@@ -1,0 +1,42 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import pandas_datareader.data as web
+import datetime as dt
+from pandas.plotting import register_matplotlib_converters
+
+register_matplotlib_converters()
+
+start=dt.datetime(2000,1,1)
+end=dt.datetime(2019,12,31)
+
+df=web.DataReader('SFR.AX', 'yahoo', start, end) #informacion financiera diaria
+
+df=df.reset_index(drop=False)
+
+print(df)
+
+df2=df.groupby(pd.Grouper(key='Date', freq='M')).nth(-1)
+df2=df2.reset_index(drop=True)
+
+print(df2) #informacion finaciera mensual 
+
+df3=df.groupby(pd.Grouper(key='Date', freq='Q')).nth(-1)
+df3=df3.reset_index(drop=True)
+
+print(df3) #informacion finaciera trimestral
+
+df4=df.groupby(pd.Grouper(key='Date', freq='Y')).nth(-1)
+df4=df4.reset_index(drop=True)
+
+print(df4) #informacion finaciera anual
+
+fig, ax=plt.subplots()
+
+ax.plot(df['Date'], df['Close'], linewidth=1.5, color='black', zorder=3)
+ax.plot(df2['Date'], df2['Close'], linewidth=2.5, color='#cb6843', zorder=3)
+ax.plot(df3['Date'], df3['Close'], linewidth=2.5, color='blue', zorder=3)
+ax.plot(df4['Date'], df4['Close'], linewidth=2.5, color='green', zorder=3)
+
+ax.grid(linestyle='--', color='darkgrey', linewidth=0.75, zorder=0)
+plt.tight_layout()
+plt.show()
