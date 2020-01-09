@@ -1,0 +1,65 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import pandas_datareader.data as web
+import datetime as dt
+from pandas.plotting import register_matplotlib_converters
+
+register_matplotlib_converters()
+
+start=dt.datetime(2000,1,1)
+end=dt.datetime.now()
+
+ticker='SFR.AX'
+
+df=web.DataReader(ticker, 'yahoo', start, end)
+
+df=df.reset_index(drop=False)
+
+df=df.drop(columns=['High', 'Low', 'Open'])
+
+df2=pd.DataFrame(data={'Date':df.groupby(pd.Grouper(key='Date', freq='M')).nth(-1)['Date']})
+
+df2=df2.reset_index(drop=True)
+
+df2['Close']=df.groupby(pd.Grouper(key='Date', freq='M')).nth(-1)['Close'].tolist()
+
+df2['Volume']=df.groupby(pd.Grouper(key='Date', freq='M'))['Volume'].sum().tolist()
+
+df2['Adj Close']=df.groupby(pd.Grouper(key='Date', freq='M')).nth(-1)['Adj Close'].tolist()
+
+print(df2)
+
+df3=pd.DataFrame(data={'Date':df.groupby(pd.Grouper(key='Date', freq='Q')).nth(-1)['Date']})
+
+df3=df3.reset_index(drop=True)
+
+df3['Close']=df.groupby(pd.Grouper(key='Date', freq='Q')).nth(-1)['Close'].tolist()
+
+df3['Volume']=df.groupby(pd.Grouper(key='Date', freq='Q'))['Volume'].sum().tolist()
+
+df3['Adj Close']=df.groupby(pd.Grouper(key='Date', freq='Q')).nth(-1)['Adj Close'].tolist()
+
+print(df3)
+
+df4=pd.DataFrame(data={'Date':df.groupby(pd.Grouper(key='Date', freq='Y')).nth(-1)['Date']})
+
+df4=df4.reset_index(drop=True)
+
+df4['Close']=df.groupby(pd.Grouper(key='Date', freq='Y')).nth(-1)['Close'].tolist()
+
+df4['Volume']=df.groupby(pd.Grouper(key='Date', freq='Y'))['Volume'].sum().tolist()
+
+df4['Adj Close']=df.groupby(pd.Grouper(key='Date', freq='Y')).nth(-1)['Adj Close'].tolist()
+
+print(df4)
+
+fig, ax=plt.subplots()
+
+ax.plot(df['Date'], df['Adj Close'], linewidth=1.5, color='black', zorder=3)
+ax.plot(df2['Date'], df2['Adj Close'], linewidth=2.5, color='#cb6843', zorder=3)
+ax.plot(df3['Date'], df3['Adj Close'], linewidth=2.5, color='blue', zorder=3)
+ax.plot(df4['Date'], df4['Adj Close'], linewidth=2.5, color='green', zorder=3)
+
+ax.grid(linestyle='--', color='darkgrey', linewidth=0.75, zorder=0)
+plt.tight_layout()
+plt.show()
